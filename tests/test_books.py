@@ -13,13 +13,12 @@ from src.main import app
 client = TestClient(app)
 
 VALID_BOOK = {
-    "id": "/books/id1",
+    "id": "/books/550e8400-e29b-41d4-a716-446655440000",
     "author": "/authors/id1",
     "name": "Fancy Tech",
     "note": "Awesome book for beginners in Fancy.",
     "serial": "C040102",
 }
-
 
 # ---------------------------------------------------------------------------
 # POST /api/books
@@ -87,6 +86,18 @@ class TestCreateBook:
 
         assert response.status_code == 409
         assert "already exists" in response.json()["detail"]
+
+        mock_put.assert_not_called()
+
+    @patch("src.main.db.get_book", return_value=None)
+    @patch("src.main.db.put_book")
+    def test_create_book_invalid_id_format(self, mock_put, mock_get):
+        bad_payload = {**VALID_BOOK, "id": "wrong-format"}  # not using prefix '/books/'
+
+        response = client.post("/api/books", json=bad_payload)
+
+        assert response.status_code == 400
+        assert "invalid" in response.json()["detail"].lower()
 
         mock_put.assert_not_called()
 

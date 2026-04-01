@@ -40,7 +40,11 @@ def create_book_api(book: Book):
         return {"message": "Book created"}
 
     except ValueError as e:
-        raise HTTPException(status_code=409, detail=str(e))
+        msg = str(e)
+        if "already exists" in msg:
+            raise HTTPException(status_code=409, detail=msg)
+        else:
+            raise HTTPException(status_code=400, detail=msg)
 
     except Exception:
         raise HTTPException(status_code=500, detail="Internal server error")

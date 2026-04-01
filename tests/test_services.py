@@ -32,7 +32,7 @@ VALID_BOOK = {
     "author": "/authors/id1",
     "name": "Fancy Tech",
     "note": "Nice",
-    "serial": "C1",
+    "serial": "C1"
 }
 
 

@@ -1,10 +1,24 @@
-def create_book_service(book: dict, db):
-    """
-    Create new book data
-    """
-    book_id = book["id"].split("/")[-1]
+def extract_book_id(book_id: str) -> str:
+    return book_id.split("/")[-1]
 
-    existing = db.get_book(book_id)
+
+def validate_book_id(book_id: str):
+    if not book_id.startswith("/books/"):
+        raise ValueError("Invalid book id format")
+
+    raw_id = book_id[len("/books/"):]
+
+    if not raw_id:
+        raise ValueError("Invalid book id format")
+
+
+def create_book_service(book: dict, db):
+    book_id = book["id"]
+    validate_book_id(book_id)
+
+    raw_id = extract_book_id(book_id)
+
+    existing = db.get_book(raw_id)
     if existing:
         raise ValueError("Book already exists")
 
@@ -15,8 +29,7 @@ def get_book_service(book_id: str, db):
     """
     Retrieving a book.
     """
-    book = db.get_book(book_id)
-    return book
+    return db.get_book(book_id)
 
 
 def list_books_service(db):
