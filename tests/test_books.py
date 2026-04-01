@@ -127,7 +127,7 @@ class TestGetBook:
 
 class TestListBooks:
 
-    @patch("src.main.mock_table", [
+    @patch("src.main.db.list_books", return_value=[
         {
             "id": "/books/id1",
             "author": "/authors/id1",
@@ -145,7 +145,7 @@ class TestListBooks:
             "pk": "id2",
         },
     ])
-    def test_list_books_success(self):
+    def test_list_books_success(self, mock_list):
         """Should return 200 and a list of books without internal fields."""
         response = client.get("/api/books")
 
@@ -159,15 +159,15 @@ class TestListBooks:
         for item in body:
             assert "pk" not in item
 
-    @patch("src.main.mock_table", [])
-    def test_list_books_empty(self):
+    @patch("src.main.db.list_books", return_value=[])
+    def test_list_books_empty(self, mock_list):
         """Should return empty list when no books exist."""
         response = client.get("/api/books")
 
         assert response.status_code == 200
         assert response.json() == []
 
-    @patch("src.main.mock_table", [
+    @patch("src.main.db.list_books", return_value=[
         {
             "id": "/books/id1",
             "author": "/authors/id1",
@@ -177,7 +177,7 @@ class TestListBooks:
             "pk": "id1",
         }
     ])
-    def test_list_books_schema(self):
+    def test_list_books_schema(self, mock_list):
         """Each item should contain required public fields only."""
         response = client.get("/api/books")
         body = response.json()
@@ -188,7 +188,7 @@ class TestListBooks:
             for field in required_fields:
                 assert field in item, f"Missing field: {field}"
 
-    @patch("src.main.mock_table", [
+    @patch("src.main.db.list_books", return_value=[
         {
             "id": "/books/id1",
             "author": "/authors/id1",
@@ -198,7 +198,7 @@ class TestListBooks:
             "pk": "id1",
         }
     ])
-    def test_list_books_content_type(self):
+    def test_list_books_content_type(self, mock_list):
         """Response content-type should be application/json."""
         response = client.get("/api/books")
         assert response.headers["content-type"].startswith("application/json")
