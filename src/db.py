@@ -1,3 +1,5 @@
+import os
+
 mock_table = [
     {
         "id": "/books/id1",
@@ -25,6 +27,10 @@ mock_table = [
     },
 ]
 
+TABLE_NAME = os.environ.get("DYNAMODB_TABLE", "books")
+REGION = os.environ.get("APP_REGION", "us-east-1")
+# you should see books-api-dev-books
+print(f"[DEBUG] Using table: {TABLE_NAME}")
 
 def get_table():
     class MockTable:

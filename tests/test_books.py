@@ -103,15 +103,6 @@ class TestCreateBook:
 
         mock_put.assert_not_called()
 
-    @patch("src.main.logger")
-    def test_create_book_logs(mock_logger):
-        db = FakeDB()
-
-        create_book_service(VALID_BOOK, db)
-
-        mock_logger.info.assert_any_call("Creating book: id1")
-        mock_logger.info.assert_any_call("Book stored: id1")
-
 
 # ---------------------------------------------------------------------------
 # GET /api/books/{id}

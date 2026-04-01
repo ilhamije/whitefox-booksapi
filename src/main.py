@@ -44,44 +44,64 @@ class db:
 # --- ROUTES ---
 @app.post("/api/books", status_code=201)
 def create_book_api(book: Book):
+    logger.info(f"POST /api/books - payload id={book.id}")
+
     try:
         create_book_service(book.model_dump(), db)
+        logger.info(f"Book created successfully: id={book.id}")
         return {"message": "Book created"}
 
     except ValueError as e:
         msg = str(e)
+        logger.warning(f"Create book failed: {msg}")
+
         if "already exists" in msg:
             raise HTTPException(status_code=409, detail=msg)
         else:
             raise HTTPException(status_code=400, detail=msg)
 
-    except Exception:
+    except Exception as e:
+        logger.error(
+            f"Unexpected error in create_book_api: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.get("/api/books/{book_id}")
 def get_book_api(book_id: str):
+    logger.info(f"GET /api/books/{book_id}")
+
     try:
-        logger.info(f"Fetching book with id={book_id}")
         book = get_book_service(book_id, db)
         if not book:
             logger.warning(f"Book not found: id={book_id}")
             raise HTTPException(status_code=404, detail="Book not found")
+
+        logger.info(f"Book retrieved: id={book_id}")
         return book
+
     except HTTPException:
         raise
-    except Exception:
+
+    except Exception as e:
+        logger.error(
+            f"Unexpected error in get_book_api: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.get("/api/books")
 def list_books_api():
+    logger.info("GET /api/books")
+
     try:
         books = list_books_service(db)
+        logger.info(f"Books retrieved: count={len(books)}")
 
         return [
             {k: v for k, v in item.items() if k != "pk"}
             for item in books
         ]
-    except Exception:
+
+    except Exception as e:
+        logger.error(
+            f"Unexpected error in list_books_api: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")

@@ -19,10 +19,9 @@ def validate_book_id(book_id: str):
 
 def create_book_service(book: dict, db):
     book_id = book["id"]
-    logger.info(f"Creating book: {book_id}")
     validate_book_id(book_id)
-
     raw_id = extract_book_id(book_id)
+    logger.info(f"Creating book: id={book_id}, raw_id={raw_id}")
 
     existing = db.get_book(raw_id)
     if existing:
@@ -34,15 +33,12 @@ def create_book_service(book: dict, db):
 
 
 def get_book_service(book_id: str, db):
-    """
-    Retrieving a book.
-    """
+    logger.info(f"Retrieving book: id={book_id}")
     return db.get_book(book_id)
 
 
 def list_books_service(db):
-    """
-    Listing books.
-    """
+    logger.info("Listing books")
     books = db.list_books()
+    logger.info(f"Retrieved books count={len(books)}")
     return books
