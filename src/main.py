@@ -1,3 +1,5 @@
+import os
+import logging
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from src.services import (
@@ -5,8 +7,13 @@ from src.services import (
     get_book_service,
     list_books_service,
 )
-from src import db as db_module
-import logging
+
+ENV = os.getenv("ENV", "local")
+
+if ENV == "test":
+    from src import db as db_module
+else:
+    from src import db_dynamo as db_module
 
 
 logging.basicConfig(
@@ -30,7 +37,7 @@ class Book(BaseModel):
 class db:
     @staticmethod
     def put_book(book: dict):
-        db_module.create_book(book)
+        return db_module.create_book(book)
 
     @staticmethod
     def get_book(book_id: str):

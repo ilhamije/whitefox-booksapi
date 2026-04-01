@@ -27,42 +27,17 @@ mock_table = [
     },
 ]
 
-TABLE_NAME = os.environ.get("DYNAMODB_TABLE", "books")
-REGION = os.environ.get("APP_REGION", "us-east-1")
-# you should see books-api-dev-books
-print(f"[DEBUG] Using table: {TABLE_NAME}")
-
-def get_table():
-    class MockTable:
-        def put_item(self, Item):
-            mock_table.append(Item)
-
-        def get_item(self, Key):
-            for item in mock_table:
-                if item.get("pk") == Key["pk"]:
-                    return {"Item": item}
-            return {}
-
-    return MockTable()
 
 
 def create_book(book: dict):
-    table = get_table()
-    book_id = book["id"].split("/")[-1]
-
-    item = {**book, "pk": book_id}
-    table.put_item(Item=item)
+    mock_table.append(book)
 
 
-def get_book(book_id: str):
-    table = get_table()
-    response = table.get_item(Key={"pk": book_id})
-    item = response.get("Item")
-
-    if not item:
+def get_book(raw_id: str):
+    for item in mock_table:
+        if item["pk"] == raw_id:
+            return {k: v for k, v in item.items() if k != "pk"}
         return None
-
-    return {k: v for k, v in item.items() if k != "pk"}
 
 
 def list_books():

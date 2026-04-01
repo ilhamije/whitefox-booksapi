@@ -28,6 +28,7 @@ def create_book_service(book: dict, db):
         logger.warning(f"Book already exists: {book_id}")
         raise ValueError("Book already exists")
 
+    book["pk"] = raw_id
     db.put_book(book)
     logger.info(f"Book stored: {book['id']}")
 

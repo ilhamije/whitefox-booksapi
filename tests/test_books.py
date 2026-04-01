@@ -9,8 +9,8 @@ import pytest
 from unittest.mock import patch
 from fastapi.testclient import TestClient
 from src.main import app
-from src.services import create_book_service
-from tests.test_services import FakeDB
+# from src.services import create_book_service
+# from tests.test_services import FakeDB
 
 client = TestClient(app)
 
@@ -20,6 +20,7 @@ VALID_BOOK = {
     "name": "Fancy Tech",
     "note": "Awesome book for beginners in Fancy.",
     "serial": "C040102",
+    "pk": "550e8400-e29b-41d4-a716-446655440000",
 }
 
 # ---------------------------------------------------------------------------
