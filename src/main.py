@@ -106,9 +106,13 @@ def get_book_api(book_id: str):
     except Exception:
         raise HTTPException(status_code=500, detail="Internal server error")
 
+
 @app.get("/api/books")
 def list_books_api():
     try:
-        return mock_table
+        return [
+            {k: v for k, v in item.items() if k != "pk"}
+            for item in mock_table
+        ]
     except Exception:
         raise HTTPException(status_code=500, detail="Internal server error")

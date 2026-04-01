@@ -119,3 +119,86 @@ class TestGetBook:
         """Response content-type should be application/json."""
         response = client.get("/api/books/id1")
         assert response.headers["content-type"].startswith("application/json")
+
+
+# ---------------------------------------------------------------------------
+# GET /api/books
+# ---------------------------------------------------------------------------
+
+class TestListBooks:
+
+    @patch("src.main.mock_table", [
+        {
+            "id": "/books/id1",
+            "author": "/authors/id1",
+            "name": "Fancy Tech",
+            "note": "Awesome book",
+            "serial": "C040102",
+            "pk": "id1",
+        },
+        {
+            "id": "/books/id2",
+            "author": "/authors/id2",
+            "name": "Advanced Fancy",
+            "note": "Advanced stuff",
+            "serial": "C040103",
+            "pk": "id2",
+        },
+    ])
+    def test_list_books_success(self):
+        """Should return 200 and a list of books without internal fields."""
+        response = client.get("/api/books")
+
+        assert response.status_code == 200
+        body = response.json()
+
+        assert isinstance(body, list)
+        assert len(body) == 2
+
+        # ensure pk is NOT exposed
+        for item in body:
+            assert "pk" not in item
+
+    @patch("src.main.mock_table", [])
+    def test_list_books_empty(self):
+        """Should return empty list when no books exist."""
+        response = client.get("/api/books")
+
+        assert response.status_code == 200
+        assert response.json() == []
+
+    @patch("src.main.mock_table", [
+        {
+            "id": "/books/id1",
+            "author": "/authors/id1",
+            "name": "Fancy Tech",
+            "note": "Awesome book",
+            "serial": "C040102",
+            "pk": "id1",
+        }
+    ])
+    def test_list_books_schema(self):
+        """Each item should contain required public fields only."""
+        response = client.get("/api/books")
+        body = response.json()
+
+        required_fields = ["id", "author", "name", "note", "serial"]
+
+        for item in body:
+            for field in required_fields:
+                assert field in item, f"Missing field: {field}"
+
+    @patch("src.main.mock_table", [
+        {
+            "id": "/books/id1",
+            "author": "/authors/id1",
+            "name": "Fancy Tech",
+            "note": "Awesome book",
+            "serial": "C040102",
+            "pk": "id1",
+        }
+    ])
+    def test_list_books_content_type(self):
+        """Response content-type should be application/json."""
+        response = client.get("/api/books")
+        assert response.headers["content-type"].startswith("application/json")
