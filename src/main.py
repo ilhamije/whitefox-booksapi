@@ -6,6 +6,15 @@ from src.services import (
     list_books_service,
 )
 from src import db as db_module
+import logging
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+)
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -53,8 +62,10 @@ def create_book_api(book: Book):
 @app.get("/api/books/{book_id}")
 def get_book_api(book_id: str):
     try:
+        logger.info(f"Fetching book with id={book_id}")
         book = get_book_service(book_id, db)
         if not book:
+            logger.warning(f"Book not found: id={book_id}")
             raise HTTPException(status_code=404, detail="Book not found")
         return book
     except HTTPException:

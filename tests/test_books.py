@@ -6,9 +6,11 @@ Run with:  pytest tests/unit/ -v
 """
 
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from fastapi.testclient import TestClient
 from src.main import app
+from src.services import create_book_service
+from tests.test_services import FakeDB
 
 client = TestClient(app)
 
@@ -100,6 +102,15 @@ class TestCreateBook:
         assert "invalid" in response.json()["detail"].lower()
 
         mock_put.assert_not_called()
+
+    @patch("src.main.logger")
+    def test_create_book_logs(mock_logger):
+        db = FakeDB()
+
+        create_book_service(VALID_BOOK, db)
+
+        mock_logger.info.assert_any_call("Creating book: id1")
+        mock_logger.info.assert_any_call("Book stored: id1")
 
 
 # ---------------------------------------------------------------------------
