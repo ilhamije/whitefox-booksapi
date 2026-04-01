@@ -1,5 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
+from src.services import (
+    create_book_service,
+    get_book_service,
+    list_books_service,
+)
 
 app = FastAPI()
 
@@ -20,6 +25,10 @@ class db:
     @staticmethod
     def get_book(book_id: str):
         return get_book(book_id)
+
+    @staticmethod
+    def list_books():
+        return mock_table
 
 
 mock_table = [
@@ -88,7 +97,7 @@ def get_book(book_id: str):
 @app.post("/api/books", status_code=201)
 def create_book_api(book: Book):
     try:
-        db.put_book(book.model_dump())
+        create_book_service(book.model_dump(), db)
         return {"message": "Book created"}
     except Exception:
         raise HTTPException(status_code=500, detail="Internal server error")
@@ -97,7 +106,7 @@ def create_book_api(book: Book):
 @app.get("/api/books/{book_id}")
 def get_book_api(book_id: str):
     try:
-        book = db.get_book(book_id)
+        book = get_book_service(book_id, db)
         if not book:
             raise HTTPException(status_code=404, detail="Book not found")
         return book
@@ -110,9 +119,10 @@ def get_book_api(book_id: str):
 @app.get("/api/books")
 def list_books_api():
     try:
+        books = list_books_service(db)
         return [
             {k: v for k, v in item.items() if k != "pk"}
-            for item in mock_table
+            for item in books
         ]
     except Exception:
         raise HTTPException(status_code=500, detail="Internal server error")
