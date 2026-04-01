@@ -27,8 +27,9 @@ VALID_BOOK = {
 
 class TestCreateBook:
 
+    @patch("src.main.db.get_book", return_value=None)
     @patch("src.main.db.put_book")
-    def test_create_book_success(self, mock_put):
+    def test_create_book_success(self, mock_put, mock_get):
         """Should return 201 when all fields are present and db write succeeds."""
         mock_put.return_value = None
         response = client.post("/api/books", json=VALID_BOOK)
@@ -53,8 +54,9 @@ class TestCreateBook:
         response = client.post("/api/books", json=payload)
         assert response.status_code == 422
 
+    @patch("src.main.db.get_book", return_value=None)
     @patch("src.main.db.put_book", side_effect=Exception("DynamoDB unavailable"))
-    def test_create_book_db_error(self, mock_put):
+    def test_create_book_db_error(self, mock_put, mock_get):
         """Should return 500 when the database raises an unexpected exception."""
         response = client.post("/api/books", json=VALID_BOOK)
         assert response.status_code == 500
@@ -76,6 +78,17 @@ class TestCreateBook:
             headers={"content-type": "text/plain"},
         )
         assert response.status_code in (422, 400)
+
+    @patch("src.main.db.get_book", return_value=VALID_BOOK)
+    @patch("src.main.db.put_book")
+    def test_create_book_duplicate(self, mock_put, mock_get):
+        """Should return 409 if book with same ID already exists."""
+        response = client.post("/api/books", json=VALID_BOOK)
+
+        assert response.status_code == 409
+        assert "already exists" in response.json()["detail"]
+
+        mock_put.assert_not_called()
 
 
 # ---------------------------------------------------------------------------

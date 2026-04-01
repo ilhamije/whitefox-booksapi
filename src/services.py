@@ -2,6 +2,12 @@ def create_book_service(book: dict, db):
     """
     Create new book data
     """
+    book_id = book["id"].split("/")[-1]
+
+    existing = db.get_book(book_id)
+    if existing:
+        raise ValueError("Book already exists")
+
     db.put_book(book)
 
 

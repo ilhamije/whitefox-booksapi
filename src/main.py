@@ -38,6 +38,10 @@ def create_book_api(book: Book):
     try:
         create_book_service(book.model_dump(), db)
         return {"message": "Book created"}
+
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
     except Exception:
         raise HTTPException(status_code=500, detail="Internal server error")
 

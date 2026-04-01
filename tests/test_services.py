@@ -49,6 +49,16 @@ def test_create_book_calls_db():
     assert "id1" in db.storage
 
 
+def test_create_book_duplicate():
+    db = FakeDB()
+    db.put_book(VALID_BOOK)
+
+    with pytest.raises(ValueError) as exc:
+        create_book_service(VALID_BOOK, db)
+
+    assert "already exists" in str(exc.value)
+
+
 # ---------------------------------------------------------------------------
 # get_book_service
 # ---------------------------------------------------------------------------
