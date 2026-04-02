@@ -41,20 +41,20 @@ class TestCreateBook:
     @pytest.mark.parametrize("missing_field", ["id", "author", "name", "note", "serial"])
     @patch("src.main.db.put_book")
     def test_create_book_missing_field(self, mock_put, missing_field):
-        """Should return 422 when any required field is missing."""
+        """Should return 400 when any required field is missing."""
         payload = {k: v for k, v in VALID_BOOK.items() if k != missing_field}
         response = client.post("/api/books", json=payload)
-        assert response.status_code == 422
-        # FastAPI 422 body contains details about the bad field
+        assert response.status_code == 400
+        # FastAPI 400 body contains details about the bad field
         body = response.json()
         assert "detail" in body
 
     @patch("src.main.db.put_book")
     def test_create_book_empty_field(self, mock_put, ):
-        """Should return 422 when a field is present but empty."""
+        """Should return 400 when a field is present but empty."""
         payload = {**VALID_BOOK, "name": ""}
         response = client.post("/api/books", json=payload)
-        assert response.status_code == 422
+        assert response.status_code == 400
 
     @patch("src.main.db.get_book", return_value=None)
     @patch("src.main.db.put_book", side_effect=Exception("DynamoDB unavailable"))
@@ -73,13 +73,13 @@ class TestCreateBook:
 
     @patch("src.main.db.put_book")
     def test_create_book_wrong_content_type(self, mock_put):
-        """Sending plain text instead of JSON should return 422."""
+        """Sending plain text instead of JSON should return 400."""
         response = client.post(
             "/api/books",
             content="not json",
             headers={"content-type": "text/plain"},
         )
-        assert response.status_code in (422, 400)
+        assert response.status_code == 400
 
     @patch("src.main.db.get_book", return_value=VALID_BOOK)
     @patch("src.main.db.put_book")

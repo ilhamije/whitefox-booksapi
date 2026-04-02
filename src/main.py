@@ -1,7 +1,8 @@
 import os
 import logging
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, Field
 from src.services import (
     create_book_service,
@@ -49,6 +50,23 @@ class db:
     @staticmethod
     def list_books():
         return db._get_impl().list_books()
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = exc.errors()
+    error_messages = []
+    for error in errors:
+        loc = ".".join([str(l) for l in error.get("loc", [])])
+        msg = error.get("msg", "")
+        error_messages.append(f"{loc}: {msg}")
+    
+    return JSONResponse(
+        status_code=400,
+        content={
+            "detail": "Invalid payload: " + "; ".join(error_messages)
+        },
+    )
 
 
 # --- ROUTES ---
