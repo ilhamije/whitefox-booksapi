@@ -1,19 +1,15 @@
 import os
 import logging
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, Field
 from src.services import (
     create_book_service,
     get_book_service,
     list_books_service,
 )
-
-ENV = os.getenv("ENV", "local")
-
-if ENV == "test":
-    from src import db as db_module
-else:
-    from src import db_dynamo as db_module
+from src import db as mock_db
+from src import db_dynamo
 
 
 logging.basicConfig(
@@ -36,19 +32,31 @@ class Book(BaseModel):
 
 class db:
     @staticmethod
+    def _get_impl():
+        env = os.getenv("ENV", "local")
+        if env == "test":
+            return mock_db
+        return db_dynamo
+
+    @staticmethod
     def put_book(book: dict):
-        return db_module.create_book(book)
+        return db._get_impl().create_book(book)
 
     @staticmethod
     def get_book(book_id: str):
-        return db_module.get_book(book_id)
+        return db._get_impl().get_book(book_id)
 
     @staticmethod
     def list_books():
-        return db_module.list_books()
+        return db._get_impl().list_books()
 
 
 # --- ROUTES ---
+@app.get("/")
+def root_redirect():
+    return RedirectResponse(url="/docs")
+
+
 @app.post("/api/books", status_code=201)
 def create_book_api(book: Book):
     logger.info(f"POST /api/books - payload id={book.id}")

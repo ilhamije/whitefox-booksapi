@@ -37,7 +37,7 @@ def get_book(raw_id: str):
     for item in mock_table:
         if item["pk"] == raw_id:
             return {k: v for k, v in item.items() if k != "pk"}
-        return None
+    return None
 
 
 def list_books():

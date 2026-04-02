@@ -1,10 +1,11 @@
-service: books-api
+service: booksapi
 
 provider:
   name: aws
   runtime: python3.11
   region: us-east-1
   environment:
+    ENV: ${sls:stage}
     DYNAMODB_TABLE: ${self:service}-${sls:stage}-books
     APP_REGION: ${self:provider.region}    # renamed from AWS_REGION
   iam:
@@ -37,6 +38,15 @@ functions:
           method: GET
       - httpApi:
           path: /api/books
+          method: GET
+      - httpApi:
+          path: /docs
+          method: GET
+      - httpApi:
+          path: /openapi.json
+          method: GET
+      - httpApi:
+          path: /
           method: GET
 
 custom:

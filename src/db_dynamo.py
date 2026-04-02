@@ -1,8 +1,7 @@
 import os
 import boto3
 
-TABLE_NAME = os.getenv("DYNAMODB_TABLE", "books")
-
+TABLE_NAME = os.getenv("DYNAMODB_TABLE", "booksapi-local-books")
 
 def get_dynamodb():
     ENV = os.getenv("ENV", "local")
@@ -10,9 +9,6 @@ def get_dynamodb():
         return boto3.resource(
             "dynamodb",
             endpoint_url="http://localhost:8000",
-            region_name="us-east-1",
-            aws_access_key_id="fake",
-            aws_secret_access_key="fake",
         )
     else:
         return boto3.resource("dynamodb")
