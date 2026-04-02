@@ -9,9 +9,16 @@ https://b9dq8x89pj.execute-api.us-east-1.amazonaws.com/api/books/{id}
 ### Test it on the browser
 Open https://b9dq8x89pj.execute-api.us-east-1.amazonaws.com/docs and try the endpoints
 
-### run the unit tests and integration test
+### Run unit tests
 ```
-pytest -v
+pytest tests/test_books.py tests/test_services.py -v
+```
+
+### Run integration tests
+Integration tests make real HTTP requests against the running API. 
+Make sure your local DynamoDB and FastAPI app are running first (see **Local Deployment** section), then run:
+```
+pytest tests/test_integration.py -v
 ```
 ### test it with CURL
 List the books
